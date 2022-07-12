@@ -7,6 +7,18 @@ export type PluginConfig = {
     {
       branchName: string;
       stateName: "Deployed To Test" | "Deployed To Preprod";
+      categories: [
+        {
+          title: string;
+          criteria: [
+            {
+              label?: string;
+              isInProject?: boolean;
+              relatedToIssueInTeam?: string;
+            }
+          ];
+        }
+      ];
     }
   ];
   mutateIssues?: [
