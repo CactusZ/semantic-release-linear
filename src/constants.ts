@@ -1,0 +1,1 @@
+export const ENV_LINEAR_API_KEY = "LINEAR_API_KEY";
