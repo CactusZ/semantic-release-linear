@@ -90,6 +90,7 @@ async function generateReleaseNotesFromCards({
   releaseNotes.push("## Linear Cards released");
 
   if (cards.length) {
+    let unmentionedCards = cards.slice();
     for (const category of notesConfigForBranch.categories) {
       const filteredCards: Issue[] = await filterCards({ category, cards });
       const relationCriteria = category.criteria.find(
@@ -104,10 +105,15 @@ async function generateReleaseNotesFromCards({
         });
         releaseNotes.push(getCardTableRow({ card, relatedCard }));
       }
+      unmentionedCards = unmentionedCards.filter((c) =>
+        filteredCards.every((f) => f.id !== c.id)
+      );
     }
-
-    for (const card of cards) {
-      releaseNotes.push(`|[${card.identifier}](${card.url})|${card.title}`);
+    if (unmentionedCards.length) {
+      releaseNotes.push(`### Other`);
+      for (const card of unmentionedCards) {
+        releaseNotes.push(`|[${card.identifier}](${card.url})|${card.title}`);
+      }
     }
   } else {
     releaseNotes.push("None linear cards are released in this release");
