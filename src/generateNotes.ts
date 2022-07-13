@@ -47,7 +47,7 @@ async function getEligibleCardsFromLinear({
   context,
   pluginConfig,
 }: {
-  stateName: "Deployed To Test" | "Deployed To Preprod";
+  stateName: string;
   linearClient: LinearClient;
   context: Context;
   pluginConfig: PluginConfig;
@@ -71,7 +71,7 @@ async function generateReleaseNotesFromCards({
   cards: Issue[];
   notesConfigForBranch: {
     branchName: string;
-    stateName: "Deployed To Test" | "Deployed To Preprod";
+    stateName: string;
     categories: [
       {
         title: string;

@@ -58,7 +58,7 @@ export async function getLinearCards({
   context,
   teamKeys,
 }: {
-  stateName: "Deployed To Test" | "Deployed To Preprod";
+  stateName: string;
   linearClient: LinearClient;
   context: Context;
   teamKeys: string[];
@@ -89,7 +89,7 @@ export async function moveCards({
   includeChildren,
 }: {
   cards: Issue[];
-  toState: "Deployed To Preprod" | "Released";
+  toState: string;
   context: Context;
   includeChildren: boolean;
 }) {

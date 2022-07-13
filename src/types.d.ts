@@ -6,7 +6,7 @@ export type PluginConfig = {
   generateNotes?: [
     {
       branchName: string;
-      stateName: "Deployed To Test" | "Deployed To Preprod";
+      stateName: string;
       categories: [
         {
           title: string;
@@ -25,11 +25,15 @@ export type PluginConfig = {
     {
       branchName: string;
       filter: {
-        stateName: "Deployed To Test" | "Deployed To Preprod";
+        stateName: string;
       };
       mutation: {
-        stateName: "Deployed To Preprod" | "Released";
+        stateName: string;
         mutateSubIssues?: boolean;
+        relatedIssueMutation?: {
+          teamKey?: string;
+          stateName?: string;
+        };
       };
     }
   ];

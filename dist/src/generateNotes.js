@@ -238,7 +238,10 @@ function filterCards(_a) {
     });
 }
 function getCardTableHeader(relationCriteria) {
-    return "| Card Id ".concat(relationCriteria ? "| Related Card " : "", "| Card Title |\", \"| --- | --- |");
+    return [
+        "| Card Id ".concat(relationCriteria ? "| Related Card " : "", "| Card Title |"),
+        "| --- ".concat(relationCriteria ? "| --- " : "", "| --- |"),
+    ];
 }
 function getCardTableRow(_a) {
     var card = _a.card, relatedCard = _a.relatedCard;
