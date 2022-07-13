@@ -15,7 +15,7 @@ export async function generateNotes(
     apiKey: context.env[ENV_LINEAR_API_KEY],
   });
 
-  const branch = context.envCi.branch;
+  const { branch } = context.envCi;
 
   const notesConfigForBranch = pluginConfig.generateNotes.find(
     (b) => b.branchName === branch
@@ -99,7 +99,7 @@ async function generateReleaseNotesFromCards({
       releaseNotes.push(`### ${category.title}`);
       releaseNotes.push(getCardTableHeader(relationCriteria));
       for (const card of filteredCards) {
-        let relatedCard: Issue | undefined = await getRelatedCard({
+        const relatedCard: Issue | undefined = await getRelatedCard({
           teamKey: relationCriteria,
           card,
         });
@@ -110,7 +110,7 @@ async function generateReleaseNotesFromCards({
       );
     }
     if (unmentionedCards.length) {
-      releaseNotes.push(`### Other`);
+      releaseNotes.push("### Other");
       for (const card of unmentionedCards) {
         releaseNotes.push(`|[${card.identifier}](${card.url})|${card.title}`);
       }
@@ -186,7 +186,7 @@ async function getRelatedCard({
   teamKey: string | undefined;
   card: Issue;
 }) {
-  let relatedCard: Issue | undefined = undefined;
+  let relatedCard: Issue | undefined;
   if (teamKey) {
     const relations = (await card.relations()).nodes;
     for (const relation of relations) {
