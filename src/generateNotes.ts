@@ -162,9 +162,10 @@ async function filterCards({
 }
 
 function getCardTableHeader(relationCriteria: string | undefined): any {
-  return `| Card Id ${
-    relationCriteria ? "| Related Card " : ""
-  }| Card Title |", "| --- | --- |`;
+  return [
+    `| Card Id ${relationCriteria ? "| Related Card " : ""}| Card Title |`,
+    `| --- ${relationCriteria ? "| --- " : ""}| --- |`,
+  ];
 }
 
 function getCardTableRow({
