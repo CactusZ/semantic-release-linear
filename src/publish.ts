@@ -33,5 +33,6 @@ export async function publish(pluginConfig: PluginConfig, context: Context) {
     toState: branchConfig.mutation.stateName,
     context,
     includeChildren: !!branchConfig.mutation.mutateSubIssues,
+    relatedIssueMutation: branchConfig.mutation.relatedIssueMutation,
   });
 }

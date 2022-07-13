@@ -70,6 +70,7 @@ function publish(pluginConfig, context) {
                             toState: branchConfig.mutation.stateName,
                             context: context,
                             includeChildren: !!branchConfig.mutation.mutateSubIssues,
+                            relatedIssueMutation: branchConfig.mutation.relatedIssueMutation,
                         })];
                 case 2:
                     _a.sent();

@@ -2,6 +2,7 @@ import { Issue, LinearClient, Team, User, WorkflowState } from "@linear/sdk";
 
 import _ from "lodash";
 import { Context } from "semantic-release";
+import { RelatedIssueMutationConfig } from "../types";
 
 export async function checkTeamsInLinear({
   linearClient,
@@ -87,11 +88,13 @@ export async function moveCards({
   toState,
   context,
   includeChildren,
+  relatedIssueMutation,
 }: {
   cards: Issue[];
   toState: string;
   context: Context;
   includeChildren: boolean;
+  relatedIssueMutation?: RelatedIssueMutationConfig;
 }) {
   context.logger.log(`Moving ${cards.length} cards to state ${toState}...`);
 
@@ -102,7 +105,13 @@ export async function moveCards({
   });
 
   for (const card of cards) {
-    await moveCard({ card, statesPerTeam, toState, context, includeChildren });
+    await moveCard({
+      card,
+      statesPerTeam,
+      toState,
+      context,
+      includeChildren,
+    });
   }
 }
 
@@ -112,12 +121,14 @@ async function moveCard({
   toState,
   context,
   includeChildren,
+  relatedIssueMutation,
 }: {
   card: Issue;
   statesPerTeam: Record<string, WorkflowState[]>;
   toState: string;
   context: Context;
   includeChildren: boolean;
+  relatedIssueMutation?: RelatedIssueMutationConfig;
 }) {
   const team = await card.team;
   if (!team) {
@@ -158,6 +169,25 @@ async function moveCard({
   await card.update({
     stateId,
   });
+
+  if (relatedIssueMutation) {
+    const relatedIssues = (await card.relations()).nodes;
+    const relatedCards = (
+      await Promise.all(relatedIssues.map((issue) => issue.relatedIssue))
+    ).filter((issue) => issue?.team === relatedIssueMutation.teamKey);
+    if (relatedCards.length) {
+      const team = await relatedCards[0]?.team;
+      const newStateId = (await team?.states())?.nodes.find(
+        (state) => state.name === relatedIssueMutation.stateName
+      )?.id;
+      if (!newStateId) {
+        throw new Error(`State not found ${relatedIssueMutation.stateName}`);
+      }
+      await Promise.all(
+        relatedCards.map((card) => card?.update({ stateId: newStateId }))
+      );
+    }
+  }
   context.logger.log(`Moved card ${card.identifier} to state ${toState}`);
 }
 

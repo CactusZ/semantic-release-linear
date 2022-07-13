@@ -126,7 +126,7 @@ function getLinearCards(_a) {
 }
 exports.getLinearCards = getLinearCards;
 function moveCards(_a) {
-    var cards = _a.cards, toState = _a.toState, context = _a.context, includeChildren = _a.includeChildren;
+    var cards = _a.cards, toState = _a.toState, context = _a.context, includeChildren = _a.includeChildren, relatedIssueMutation = _a.relatedIssueMutation;
     return __awaiter(this, void 0, void 0, function () {
         var statesPerTeam, _i, cards_1, card;
         return __generator(this, function (_b) {
@@ -145,7 +145,13 @@ function moveCards(_a) {
                 case 2:
                     if (!(_i < cards_1.length)) return [3 /*break*/, 5];
                     card = cards_1[_i];
-                    return [4 /*yield*/, moveCard({ card: card, statesPerTeam: statesPerTeam, toState: toState, context: context, includeChildren: includeChildren })];
+                    return [4 /*yield*/, moveCard({
+                            card: card,
+                            statesPerTeam: statesPerTeam,
+                            toState: toState,
+                            context: context,
+                            includeChildren: includeChildren,
+                        })];
                 case 3:
                     _b.sent();
                     _b.label = 4;
@@ -159,15 +165,15 @@ function moveCards(_a) {
 }
 exports.moveCards = moveCards;
 function moveCard(_a) {
-    var _b;
-    var card = _a.card, statesPerTeam = _a.statesPerTeam, toState = _a.toState, context = _a.context, includeChildren = _a.includeChildren;
+    var _b, _c, _d, _e;
+    var card = _a.card, statesPerTeam = _a.statesPerTeam, toState = _a.toState, context = _a.context, includeChildren = _a.includeChildren, relatedIssueMutation = _a.relatedIssueMutation;
     return __awaiter(this, void 0, void 0, function () {
-        var team, teamId, teamKey, stateId, subIssues, _i, subIssues_1, subIssue;
-        return __generator(this, function (_c) {
-            switch (_c.label) {
+        var team, teamId, teamKey, stateId, subIssues, _i, subIssues_1, subIssue, relatedIssues, relatedCards, team_1, newStateId_1;
+        return __generator(this, function (_f) {
+            switch (_f.label) {
                 case 0: return [4 /*yield*/, card.team];
                 case 1:
-                    team = _c.sent();
+                    team = _f.sent();
                     if (!team) {
                         context.logger.error("Card ".concat(card.id, " has no team"));
                         throw new Error("Card ".concat(card.id, " has no team"));
@@ -187,9 +193,9 @@ function moveCard(_a) {
                     if (!includeChildren) return [3 /*break*/, 6];
                     return [4 /*yield*/, card.children()];
                 case 2:
-                    subIssues = (_c.sent()).nodes || [];
+                    subIssues = (_f.sent()).nodes || [];
                     _i = 0, subIssues_1 = subIssues;
-                    _c.label = 3;
+                    _f.label = 3;
                 case 3:
                     if (!(_i < subIssues_1.length)) return [3 /*break*/, 6];
                     subIssue = subIssues_1[_i];
@@ -202,8 +208,8 @@ function moveCard(_a) {
                             includeChildren: includeChildren,
                         })];
                 case 4:
-                    _c.sent();
-                    _c.label = 5;
+                    _f.sent();
+                    _f.label = 5;
                 case 5:
                     _i++;
                     return [3 /*break*/, 3];
@@ -211,7 +217,29 @@ function moveCard(_a) {
                         stateId: stateId,
                     })];
                 case 7:
-                    _c.sent();
+                    _f.sent();
+                    if (!relatedIssueMutation) return [3 /*break*/, 13];
+                    return [4 /*yield*/, card.relations()];
+                case 8:
+                    relatedIssues = (_f.sent()).nodes;
+                    return [4 /*yield*/, Promise.all(relatedIssues.map(function (issue) { return issue.relatedIssue; }))];
+                case 9:
+                    relatedCards = (_f.sent()).filter(function (issue) { return (issue === null || issue === void 0 ? void 0 : issue.team) === relatedIssueMutation.teamKey; });
+                    if (!relatedCards.length) return [3 /*break*/, 13];
+                    return [4 /*yield*/, ((_c = relatedCards[0]) === null || _c === void 0 ? void 0 : _c.team)];
+                case 10:
+                    team_1 = _f.sent();
+                    return [4 /*yield*/, (team_1 === null || team_1 === void 0 ? void 0 : team_1.states())];
+                case 11:
+                    newStateId_1 = (_e = (_d = (_f.sent())) === null || _d === void 0 ? void 0 : _d.nodes.find(function (state) { return state.name === relatedIssueMutation.stateName; })) === null || _e === void 0 ? void 0 : _e.id;
+                    if (!newStateId_1) {
+                        throw new Error("State not found ".concat(relatedIssueMutation.stateName));
+                    }
+                    return [4 /*yield*/, Promise.all(relatedCards.map(function (card) { return card === null || card === void 0 ? void 0 : card.update({ stateId: newStateId_1 }); }))];
+                case 12:
+                    _f.sent();
+                    _f.label = 13;
+                case 13:
                     context.logger.log("Moved card ".concat(card.identifier, " to state ").concat(toState));
                     return [2 /*return*/];
             }

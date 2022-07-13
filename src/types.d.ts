@@ -1,5 +1,10 @@
 import { Context as SemanticReleaseContext } from "semantic-release";
 
+type RelatedIssueMutationConfig = {
+  teamKey?: string;
+  stateName?: string;
+};
+
 export type PluginConfig = {
   teamKeys: string[];
 
@@ -30,10 +35,7 @@ export type PluginConfig = {
       mutation: {
         stateName: string;
         mutateSubIssues?: boolean;
-        relatedIssueMutation?: {
-          teamKey?: string;
-          stateName?: string;
-        };
+        relatedIssueMutation?: RelatedIssueMutationConfig;
       };
     }
   ];
