@@ -151,6 +151,7 @@ function moveCards(_a) {
                             toState: toState,
                             context: context,
                             includeChildren: includeChildren,
+                            relatedIssueMutation: relatedIssueMutation,
                         })];
                 case 3:
                     _b.sent();

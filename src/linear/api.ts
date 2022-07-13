@@ -111,6 +111,7 @@ export async function moveCards({
       toState,
       context,
       includeChildren,
+      relatedIssueMutation,
     });
   }
 }
