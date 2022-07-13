@@ -172,11 +172,19 @@ async function moveCard({
   });
 
   if (relatedIssueMutation) {
-    const relatedIssues = (await card.relations()).nodes;
-    const relatedCards = (
-      await Promise.all(relatedIssues.map((issue) => issue.relatedIssue))
-    ).filter((issue) => issue?.team === relatedIssueMutation.teamKey);
+    const relations = (await card.relations()).nodes;
+    const relatedIssues = await Promise.all(
+      relations.map((relation) => relation.relatedIssue)
+    );
+    const relatedIssueTeams = await Promise.all(
+      relatedIssues.map((issue) => issue?.team)
+    );
+    const relatedCards = relatedIssues.filter(
+      (issue, index) =>
+        relatedIssueTeams[index]?.key === relatedIssueMutation.teamKey
+    );
     if (relatedCards.length) {
+      context.logger.log(`Found ${relatedCards.length} related cards`);
       const team = await relatedCards[0]?.team;
       const newStateId = (await team?.states())?.nodes.find(
         (state) => state.name === relatedIssueMutation.stateName
@@ -184,6 +192,12 @@ async function moveCard({
       if (!newStateId) {
         throw new Error(`State not found ${relatedIssueMutation.stateName}`);
       }
+      context.logger.log(
+        `Updating ${relatedCards.length} related cards. Setting state to ${relatedIssueMutation.stateName}`
+      );
+      context.logger.log(
+        `Updating cards: ${relatedCards.map((c) => c?.identifier)}`
+      );
       await Promise.all(
         relatedCards.map((card) => card?.update({ stateId: newStateId }))
       );
