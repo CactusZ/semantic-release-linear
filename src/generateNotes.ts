@@ -97,7 +97,7 @@ async function generateReleaseNotesFromCards({
         (c) => c.relatedToIssueInTeam
       )?.relatedToIssueInTeam;
       releaseNotes.push(`### ${category.title}`);
-      releaseNotes.push(getCardTableHeader(relationCriteria));
+      releaseNotes.push(...getCardTableHeader(relationCriteria));
       for (const card of filteredCards) {
         const relatedCard: Issue | undefined = await getRelatedCard({
           teamKey: relationCriteria,
@@ -111,6 +111,7 @@ async function generateReleaseNotesFromCards({
     }
     if (unmentionedCards.length) {
       releaseNotes.push("### Other");
+      releaseNotes.push(...getCardTableHeader());
       for (const card of unmentionedCards) {
         releaseNotes.push(`|[${card.identifier}](${card.url})|${card.title}`);
       }
@@ -161,7 +162,7 @@ async function filterCards({
   return filteredCards;
 }
 
-function getCardTableHeader(relationCriteria: string | undefined): any {
+function getCardTableHeader(relationCriteria?: string | undefined): any {
   return [
     `| Card Id ${relationCriteria ? "| Related Card " : ""}| Card Title |`,
     `| --- ${relationCriteria ? "| --- " : ""}| --- |`,
