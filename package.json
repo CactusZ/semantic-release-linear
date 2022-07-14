@@ -1,6 +1,6 @@
 {
   "name": "semantic-release-linear",
-  "version": "1.2.2",
+  "version": "1.3.0",
   "description": "Semantic Release Linear plugin",
   "main": "dist/index.js",
   "repository": "git@github.com:CactusZ/semantic-release-linear.git",
