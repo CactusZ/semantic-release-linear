@@ -1,4 +1,5 @@
 import { LinearClient } from "@linear/sdk";
+import micromatch from "micromatch";
 import { ENV_LINEAR_API_KEY } from "./constants";
 import { getLinearCards } from "./linear/api";
 import { PluginConfig, Context } from "./types";
@@ -16,8 +17,8 @@ export async function analyzeCommits(
 
   const branch = context.envCi.branch;
 
-  const stateName = pluginConfig.generateNotes.find(
-    (b) => b.branchName === branch
+  const stateName = pluginConfig.generateNotes.find((b) =>
+    micromatch.isMatch(branch, b.branchName)
   )?.stateName;
 
   if (!stateName) {
