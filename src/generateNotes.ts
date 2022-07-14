@@ -3,6 +3,7 @@ import _ from "lodash";
 import { ENV_LINEAR_API_KEY } from "./constants";
 import { getLinearCards } from "./linear/api";
 import { Context, PluginConfig } from "./types";
+import * as micromatch from "micromatch";
 
 export async function generateNotes(
   pluginConfig: PluginConfig,
@@ -17,8 +18,8 @@ export async function generateNotes(
 
   const { branch } = context.envCi;
 
-  const notesConfigForBranch = pluginConfig.generateNotes.find(
-    (b) => b.branchName === branch
+  const notesConfigForBranch = pluginConfig.generateNotes.find((b) =>
+    micromatch.isMatch(branch, b.branchName)
   );
   const stateName = notesConfigForBranch?.stateName;
 
