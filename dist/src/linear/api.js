@@ -169,7 +169,7 @@ function moveCard(_a) {
     var _b, _c, _d, _e;
     var card = _a.card, statesPerTeam = _a.statesPerTeam, toState = _a.toState, context = _a.context, includeChildren = _a.includeChildren, relatedIssueMutation = _a.relatedIssueMutation;
     return __awaiter(this, void 0, void 0, function () {
-        var team, teamId, teamKey, stateId, subIssues, _i, subIssues_1, subIssue, relatedIssues, relatedCards, team_1, newStateId_1;
+        var team, teamId, teamKey, stateId, subIssues, _i, subIssues_1, subIssue, relations, relatedIssues, relatedIssueTeams_1, relatedCards, team_1, newStateId_1;
         return __generator(this, function (_f) {
             switch (_f.label) {
                 case 0: return [4 /*yield*/, card.team];
@@ -219,28 +219,35 @@ function moveCard(_a) {
                     })];
                 case 7:
                     _f.sent();
-                    if (!relatedIssueMutation) return [3 /*break*/, 13];
+                    if (!relatedIssueMutation) return [3 /*break*/, 14];
                     return [4 /*yield*/, card.relations()];
                 case 8:
-                    relatedIssues = (_f.sent()).nodes;
-                    return [4 /*yield*/, Promise.all(relatedIssues.map(function (issue) { return issue.relatedIssue; }))];
+                    relations = (_f.sent()).nodes;
+                    return [4 /*yield*/, Promise.all(relations.map(function (relation) { return relation.relatedIssue; }))];
                 case 9:
-                    relatedCards = (_f.sent()).filter(function (issue) { return (issue === null || issue === void 0 ? void 0 : issue.team) === relatedIssueMutation.teamKey; });
-                    if (!relatedCards.length) return [3 /*break*/, 13];
-                    return [4 /*yield*/, ((_c = relatedCards[0]) === null || _c === void 0 ? void 0 : _c.team)];
+                    relatedIssues = _f.sent();
+                    return [4 /*yield*/, Promise.all(relatedIssues.map(function (issue) { return issue === null || issue === void 0 ? void 0 : issue.team; }))];
                 case 10:
+                    relatedIssueTeams_1 = _f.sent();
+                    relatedCards = relatedIssues.filter(function (issue, index) { var _a; return ((_a = relatedIssueTeams_1[index]) === null || _a === void 0 ? void 0 : _a.key) === relatedIssueMutation.teamKey; });
+                    if (!relatedCards.length) return [3 /*break*/, 14];
+                    context.logger.log("Found ".concat(relatedCards.length, " related cards"));
+                    return [4 /*yield*/, ((_c = relatedCards[0]) === null || _c === void 0 ? void 0 : _c.team)];
+                case 11:
                     team_1 = _f.sent();
                     return [4 /*yield*/, (team_1 === null || team_1 === void 0 ? void 0 : team_1.states())];
-                case 11:
+                case 12:
                     newStateId_1 = (_e = (_d = (_f.sent())) === null || _d === void 0 ? void 0 : _d.nodes.find(function (state) { return state.name === relatedIssueMutation.stateName; })) === null || _e === void 0 ? void 0 : _e.id;
                     if (!newStateId_1) {
                         throw new Error("State not found ".concat(relatedIssueMutation.stateName));
                     }
+                    context.logger.log("Updating ".concat(relatedCards.length, " related cards. Setting state to ").concat(relatedIssueMutation.stateName));
+                    context.logger.log("Updating cards: ".concat(relatedCards.map(function (c) { return c === null || c === void 0 ? void 0 : c.identifier; })));
                     return [4 /*yield*/, Promise.all(relatedCards.map(function (card) { return card === null || card === void 0 ? void 0 : card.update({ stateId: newStateId_1 }); }))];
-                case 12:
-                    _f.sent();
-                    _f.label = 13;
                 case 13:
+                    _f.sent();
+                    _f.label = 14;
+                case 14:
                     context.logger.log("Moved card ".concat(card.identifier, " to state ").concat(toState));
                     return [2 /*return*/];
             }

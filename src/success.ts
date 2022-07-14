@@ -3,7 +3,7 @@ import { ENV_LINEAR_API_KEY } from "./constants";
 import { getLinearCards, moveCards } from "./linear/api";
 import { PluginConfig, Context } from "./types";
 
-export async function publish(pluginConfig: PluginConfig, context: Context) {
+export async function success(pluginConfig: PluginConfig, context: Context) {
   if (!pluginConfig.mutateIssues) {
     return;
   }

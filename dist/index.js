@@ -1,11 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.publish = exports.generateNotes = exports.analyzeCommits = exports.verifyConditions = void 0;
+exports.success = exports.generateNotes = exports.analyzeCommits = exports.verifyConditions = void 0;
 var analyzeCommits_1 = require("./src/analyzeCommits");
 Object.defineProperty(exports, "analyzeCommits", { enumerable: true, get: function () { return analyzeCommits_1.analyzeCommits; } });
 var generateNotes_1 = require("./src/generateNotes");
 Object.defineProperty(exports, "generateNotes", { enumerable: true, get: function () { return generateNotes_1.generateNotes; } });
-var publish_1 = require("./src/publish");
-Object.defineProperty(exports, "publish", { enumerable: true, get: function () { return publish_1.publish; } });
+var success_1 = require("./src/success");
+Object.defineProperty(exports, "success", { enumerable: true, get: function () { return success_1.success; } });
 var verifyConditions_1 = require("./src/verifyConditions");
 Object.defineProperty(exports, "verifyConditions", { enumerable: true, get: function () { return verifyConditions_1.verifyConditions; } });
