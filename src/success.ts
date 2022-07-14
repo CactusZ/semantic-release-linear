@@ -1,4 +1,5 @@
 import { LinearClient } from "@linear/sdk";
+import micromatch from "micromatch";
 import { ENV_LINEAR_API_KEY } from "./constants";
 import { getLinearCards, moveCards } from "./linear/api";
 import { PluginConfig, Context } from "./types";
@@ -9,8 +10,8 @@ export async function success(pluginConfig: PluginConfig, context: Context) {
   }
 
   const branchName = context.envCi.branch;
-  const branchConfig = pluginConfig.mutateIssues.find(
-    (c) => c.branchName === branchName
+  const branchConfig = pluginConfig.mutateIssues.find((c) =>
+    micromatch.isMatch(branchName, c.branchName)
   );
 
   if (!branchConfig) {
