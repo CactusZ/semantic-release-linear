@@ -179,7 +179,7 @@ function getCardTableRow({
 }): any {
   return `|[${card.identifier}](${card.url})${
     relatedCard ? `|[${relatedCard.identifier}](${relatedCard.url})` : ""
-  }|${card.title.replace(/|/g, ",")}|`;
+  }|${card.title.replace(/\|/g, ",")}|`;
 }
 
 async function getRelatedCard({
