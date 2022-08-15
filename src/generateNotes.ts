@@ -2,7 +2,7 @@ import { Issue, LinearClient } from "@linear/sdk";
 import _ from "lodash";
 import { ENV_LINEAR_API_KEY } from "./constants";
 import { getLinearCards } from "./linear/api";
-import { Context, PluginConfig } from "./types";
+import { Context, GenerateNotesConfig, PluginConfig } from "./types";
 import * as micromatch from "micromatch";
 
 export async function generateNotes(
@@ -70,57 +70,129 @@ async function generateReleaseNotesFromCards({
   notesConfigForBranch,
 }: {
   cards: Issue[];
-  notesConfigForBranch: {
-    branchName: string;
-    stateName: string;
-    categories: [
-      {
-        title: string;
-        criteria: [
-          {
-            label?: string | undefined;
-            isInProject?: boolean | undefined;
-            relatedToIssueInTeam?: string | undefined;
-          }
-        ];
-      }
-    ];
-  };
+  notesConfigForBranch: GenerateNotesConfig;
 }) {
-  const releaseNotes = [];
+  const releaseNotes: string[] = [];
   releaseNotes.push("## Linear Cards released");
 
   if (cards.length) {
-    let unmentionedCards = cards.slice();
-    for (const category of notesConfigForBranch.categories) {
-      const filteredCards: Issue[] = await filterCards({ category, cards });
-      const relationCriteria = category.criteria.find(
-        (c) => c.relatedToIssueInTeam
-      )?.relatedToIssueInTeam;
-      releaseNotes.push(`### ${category.title}`);
-      releaseNotes.push(...getCardTableHeader(relationCriteria));
-      for (const card of filteredCards) {
-        const relatedCard: Issue | undefined = await getRelatedCard({
-          teamKey: relationCriteria,
-          card,
-        });
-        releaseNotes.push(getCardTableRow({ card, relatedCard }));
-      }
-      unmentionedCards = unmentionedCards.filter((c) =>
-        filteredCards.every((f) => f.id !== c.id)
-      );
-    }
-    if (unmentionedCards.length) {
-      releaseNotes.push("### Other");
-      releaseNotes.push(...getCardTableHeader());
-      for (const card of unmentionedCards) {
-        releaseNotes.push(`|[${card.identifier}](${card.url})|${card.title}`);
-      }
-    }
+    const sortedByPriorityCategories = sortByPriority(notesConfigForBranch);
+
+    const sortedByOrderInNotes = _.sortBy(
+      sortedByPriorityCategories,
+      "orderInNotes"
+    );
+
+    await fillReleaseNotes({ sortedByOrderInNotes, releaseNotes });
+
+    await fillUnmentionedCategory({
+      sortedByPriorityCategories,
+      releaseNotes,
+      allCards: cards,
+    });
   } else {
     releaseNotes.push("None linear cards are released in this release");
   }
   return releaseNotes;
+}
+
+async function fillUnmentionedCategory({
+  sortedByPriorityCategories,
+  releaseNotes,
+  allCards,
+}: {
+  sortedByPriorityCategories: CategoryUnwinded[];
+  releaseNotes: string[];
+  allCards: Issue[];
+}) {
+  const unmentionedCards = await fillCardsAndReturnUnmentioned({
+    sortedByPriorityCategories,
+    allCards,
+  });
+
+  if (unmentionedCards.length) {
+    releaseNotes.push("### Other");
+    releaseNotes.push(...getCardTableHeader());
+    for (const card of unmentionedCards) {
+      releaseNotes.push(`|[${card.identifier}](${card.url})|${card.title}`);
+    }
+  }
+}
+
+async function fillReleaseNotes({
+  sortedByOrderInNotes,
+  releaseNotes,
+}: {
+  sortedByOrderInNotes: CategoryUnwinded[];
+  releaseNotes: string[];
+}) {
+  for (const { category, cards: categoryCards } of sortedByOrderInNotes) {
+    releaseNotes.push(`### ${category.title}`);
+
+    const relationCriteria = category.criteria.find(
+      (c) => c.relatedToIssueInTeam
+    )?.relatedToIssueInTeam;
+    releaseNotes.push(...getCardTableHeader(relationCriteria));
+
+    for (const card of categoryCards) {
+      const relatedCard: Issue | undefined = await getRelatedCard({
+        teamKey: relationCriteria,
+        card,
+      });
+      releaseNotes.push(getCardTableRow({ card, relatedCard }));
+    }
+  }
+}
+
+type CategoryUnwinded = {
+  category: {
+    title: string;
+    priority?: number | undefined;
+    orderInNotes?: number | undefined;
+    criteria: [
+      {
+        label?: string | undefined;
+        isInProject?: boolean | undefined;
+        relatedToIssueInTeam?: string | undefined;
+      }
+    ];
+  };
+  cards: Issue[];
+  orderInNotes: number;
+};
+
+async function fillCardsAndReturnUnmentioned({
+  sortedByPriorityCategories,
+  allCards,
+}: {
+  sortedByPriorityCategories: CategoryUnwinded[];
+  allCards: Issue[];
+}) {
+  let unmentionedCards = allCards.slice();
+  for (const obj of sortedByPriorityCategories) {
+    const category = obj.category;
+    obj.cards = await filterCards({ category, cards: allCards });
+
+    unmentionedCards = unmentionedCards.filter((c) =>
+      obj.cards.every((f) => f.id !== c.id)
+    );
+  }
+  return unmentionedCards;
+}
+
+function sortByPriority(notesConfigForBranch: GenerateNotesConfig) {
+  const categoriesWithCards = notesConfigForBranch.categories.map(
+    (category, index) => ({
+      category: category,
+      cards: [] as Issue[],
+      orderInNotes: category.orderInNotes || index,
+    })
+  );
+  const sortedByPriorityCategories = _.sortBy(
+    categoriesWithCards,
+    "category.priority"
+  );
+  return sortedByPriorityCategories;
 }
 
 async function filterCards({
@@ -152,7 +224,7 @@ async function filterCards({
     }
     if (criteria.relatedToIssueInTeam) {
       cardsByCriteria.push(
-        await getCardsWithIssueInTeam({
+        await getCardsWithRelatedIssues({
           cards,
           relatedTeamKey: criteria.relatedToIssueInTeam,
         })
@@ -163,7 +235,7 @@ async function filterCards({
   return filteredCards;
 }
 
-function getCardTableHeader(relationCriteria?: string | undefined): any {
+function getCardTableHeader(relationCriteria?: string | undefined): string[] {
   return [
     `| Card Id ${relationCriteria ? "| Related Card " : ""}| Card Title |`,
     `| --- ${relationCriteria ? "| --- " : ""}| --- |`,
@@ -176,7 +248,7 @@ function getCardTableRow({
 }: {
   card: Issue;
   relatedCard: Issue | undefined;
-}): any {
+}): string {
   return `|[${card.identifier}](${card.url})${
     relatedCard ? `|[${relatedCard.identifier}](${relatedCard.url})` : ""
   }|${card.title.replace(/\|/g, ",")}|`;
@@ -231,7 +303,7 @@ async function getCardsInProjects(cards: Issue[]) {
   return result;
 }
 
-async function getCardsWithIssueInTeam({
+async function getCardsWithRelatedIssues({
   cards,
   relatedTeamKey,
 }: {
@@ -264,7 +336,9 @@ async function filterOutSubIssues(cards: Issue[]) {
   const hasParentIssue: Record<string, boolean> = {};
   for (const card of cards) {
     const parent = await card.parent;
-    if (parent && cards.some((c) => c.id === parent.id)) {
+    const isParentPresentInCards =
+      parent && cards.some((c) => c.id === parent.id);
+    if (isParentPresentInCards) {
       hasParentIssue[card.id] = true;
     }
   }

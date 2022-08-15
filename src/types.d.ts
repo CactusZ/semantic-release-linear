@@ -5,40 +5,44 @@ type RelatedIssueMutationConfig = {
   stateName?: string;
 };
 
-export type PluginConfig = {
-  teamKeys: string[];
-
-  generateNotes?: [
+export type GenerateNotesConfig = {
+  branchName: string;
+  stateName: string;
+  categories: [
     {
-      branchName: string;
-      stateName: string;
-      categories: [
+      title: string;
+      priority?: number;
+      orderInNotes?: number;
+      criteria: [
         {
-          title: string;
-          criteria: [
-            {
-              label?: string;
-              isInProject?: boolean;
-              relatedToIssueInTeam?: string;
-            }
-          ];
+          label?: string;
+          isInProject?: boolean;
+          relatedToIssueInTeam?: string;
         }
       ];
     }
   ];
-  mutateIssues?: [
-    {
-      branchName: string;
-      filter: {
-        stateName: string;
-      };
-      mutation: {
-        stateName: string;
-        mutateSubIssues?: boolean;
-        relatedIssueMutation?: RelatedIssueMutationConfig;
-      };
-    }
-  ];
+};
+
+export type MutateIssuesConfig = [
+  {
+    branchName: string;
+    filter: {
+      stateName: string;
+    };
+    mutation: {
+      stateName: string;
+      mutateSubIssues?: boolean;
+      relatedIssueMutation?: RelatedIssueMutationConfig;
+    };
+  }
+];
+
+export type PluginConfig = {
+  teamKeys: string[];
+
+  generateNotes?: GenerateNotesConfig[];
+  mutateIssues?: MutateIssuesConfig;
 };
 
 export type Context = SemanticReleaseContext & {
