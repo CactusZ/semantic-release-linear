@@ -4,17 +4,16 @@ import { ENV_LINEAR_API_KEY } from "./constants";
 import { getLinearCards } from "./linear/api";
 import { Context, GenerateNotesConfig, PluginConfig } from "./types";
 import * as micromatch from "micromatch";
+import { generateLinearClient } from "./linear/clientGenerator";
 
 export async function generateNotes(
   pluginConfig: PluginConfig,
   context: Context
 ) {
   if (!pluginConfig.generateNotes) {
-    return;
+    return "";
   }
-  const linearClient = new LinearClient({
-    apiKey: context.env[ENV_LINEAR_API_KEY],
-  });
+  const linearClient = generateLinearClient(context);
 
   const { branch } = context.envCi;
 
@@ -82,13 +81,16 @@ async function generateReleaseNotesFromCards({
       sortedByPriorityCategories,
       "orderInNotes"
     );
+    const unmentionedCards = await fillCardsAndReturnUnmentioned({
+      sortedByPriorityCategories,
+      allCards: cards,
+    });
 
     await fillReleaseNotes({ sortedByOrderInNotes, releaseNotes });
 
     await fillUnmentionedCategory({
-      sortedByPriorityCategories,
+      unmentionedCards,
       releaseNotes,
-      allCards: cards,
     });
   } else {
     releaseNotes.push("None linear cards are released in this release");
@@ -97,19 +99,12 @@ async function generateReleaseNotesFromCards({
 }
 
 async function fillUnmentionedCategory({
-  sortedByPriorityCategories,
   releaseNotes,
-  allCards,
+  unmentionedCards,
 }: {
-  sortedByPriorityCategories: CategoryUnwinded[];
   releaseNotes: string[];
-  allCards: Issue[];
+  unmentionedCards: Issue[];
 }) {
-  const unmentionedCards = await fillCardsAndReturnUnmentioned({
-    sortedByPriorityCategories,
-    allCards,
-  });
-
   if (unmentionedCards.length) {
     releaseNotes.push("### Other");
     releaseNotes.push(...getCardTableHeader());
@@ -169,10 +164,15 @@ async function fillCardsAndReturnUnmentioned({
   allCards: Issue[];
 }) {
   let unmentionedCards = allCards.slice();
+  let mentionedCards: Issue[] = [];
   for (const obj of sortedByPriorityCategories) {
     const category = obj.category;
-    obj.cards = await filterCards({ category, cards: allCards });
+    const filteredCards = await filterCards({ category, cards: allCards });
 
+    obj.cards = filteredCards.filter(
+      (card) => !mentionedCards.some((c) => c.identifier === card.identifier)
+    );
+    mentionedCards.push(...obj.cards);
     unmentionedCards = unmentionedCards.filter((c) =>
       obj.cards.every((f) => f.id !== c.id)
     );

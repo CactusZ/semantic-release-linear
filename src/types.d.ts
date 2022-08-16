@@ -8,20 +8,18 @@ type RelatedIssueMutationConfig = {
 export type GenerateNotesConfig = {
   branchName: string;
   stateName: string;
-  categories: [
-    {
-      title: string;
-      priority?: number;
-      orderInNotes?: number;
-      criteria: [
-        {
-          label?: string;
-          isInProject?: boolean;
-          relatedToIssueInTeam?: string;
-        }
-      ];
-    }
-  ];
+  categories: Array<{
+    title: string;
+    priority?: number;
+    orderInNotes?: number;
+    criteria: [
+      {
+        label?: string;
+        isInProject?: boolean;
+        relatedToIssueInTeam?: string;
+      }
+    ];
+  }>;
 };
 
 export type MutateIssuesConfig = [
