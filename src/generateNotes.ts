@@ -109,7 +109,7 @@ async function fillUnmentionedCategory({
     releaseNotes.push("### Other");
     releaseNotes.push(...getCardTableHeader());
     for (const card of unmentionedCards) {
-      releaseNotes.push(getCardTableRow({ card }));
+      releaseNotes.push(getCardTableRow({ card, relatedCard: undefined }));
     }
   }
 }
