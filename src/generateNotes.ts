@@ -333,14 +333,5 @@ async function getCardsWithRelatedIssues({
 }
 
 async function filterOutSubIssues(cards: Issue[]) {
-  const hasParentIssue: Record<string, boolean> = {};
-  for (const card of cards) {
-    const parent = await card.parent;
-    const isParentPresentInCards =
-      parent && cards.some((c) => c.id === parent.id);
-    if (isParentPresentInCards) {
-      hasParentIssue[card.id] = true;
-    }
-  }
-  return cards.filter((c) => !hasParentIssue[c.id]);
+  return cards.filter((c) => !c.parent);
 }

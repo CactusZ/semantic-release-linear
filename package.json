@@ -18,6 +18,7 @@
     "@typescript-eslint/eslint-plugin": "^5.30.5",
     "@typescript-eslint/parser": "^5.30.5",
     "chai": "^4.3.6",
+    "cz-conventional-changelog": "^3.3.0",
     "eslint": "^7.32.0 || ^8.2.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-prettier": "^8.5.0",
@@ -29,6 +30,7 @@
   },
   "dependencies": {
     "@linear/sdk": "^1.22.0",
+    "commitizen": "^4.2.5",
     "lodash": "^4.17.21",
     "micromatch": "^4.0.5",
     "typescript": "^4.7.4"
@@ -40,5 +42,10 @@
   },
   "files": [
     "dist"
-  ]
+  ],
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  }
 }
