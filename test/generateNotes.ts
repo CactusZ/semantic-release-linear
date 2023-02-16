@@ -40,9 +40,9 @@ describe("generateNotes", () => {
       logger: {
         log: Sinon.fake(),
         error: Sinon.fake(),
-      },
+      } as unknown as Context["logger"],
       env: {},
-    };
+    } as Context;
     const releaseNotes = await generateNotes(pluginConfig, context);
     expect(releaseNotes).to.equal("");
   });
@@ -76,9 +76,9 @@ describe("generateNotes", () => {
       logger: {
         log: Sinon.fake(),
         error: Sinon.fake(),
-      },
+      } as unknown as Context["logger"],
       env: {},
-    };
+    } as Context;
     const releaseNotes = await generateNotes(pluginConfig, context);
     expect(releaseNotes).to.equal(
       "## Linear Cards released\nNone linear cards are released in this release"
@@ -114,9 +114,9 @@ describe("generateNotes", () => {
       logger: {
         log: Sinon.fake(),
         error: Sinon.fake(),
-      },
+      } as unknown as Context["logger"],
       env: {},
-    };
+    } as Context;
     issuesFake = Sinon.fake.returns(
       Promise.resolve({
         nodes: [
@@ -180,9 +180,9 @@ describe("generateNotes", () => {
       logger: {
         log: Sinon.fake(),
         error: Sinon.fake(),
-      },
+      } as unknown as Context["logger"],
       env: {},
-    };
+    } as Context;
     issuesFake = Sinon.fake.returns(
       Promise.resolve({
         nodes: [

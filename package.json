@@ -24,12 +24,12 @@
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-import": "^2.25.2",
     "mocha": "^10.0.0",
-    "semantic-release": "^19.0.3",
+    "semantic-release": "^20.1.0",
     "sinon": "^14.0.0",
     "ts-node": "^10.9.1"
   },
   "dependencies": {
-    "@linear/sdk": "^1.22.0",
+    "@linear/sdk": "^2.3",
     "commitizen": "^4.2.5",
     "lodash": "^4.17.21",
     "micromatch": "^4.0.5",
