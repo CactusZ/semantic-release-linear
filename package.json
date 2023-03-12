@@ -29,11 +29,11 @@
     "ts-node": "^10.9.1"
   },
   "dependencies": {
-    "@linear/sdk": "^2.3",
-    "commitizen": "^4.2.5",
+    "@linear/sdk": "^2.6",
+    "commitizen": "^4.3.0",
     "lodash": "^4.17.21",
     "micromatch": "^4.0.5",
-    "typescript": "^4.7.4"
+    "typescript": "^4.9.5"
   },
   "scripts": {
     "build": "yarn run tsc",

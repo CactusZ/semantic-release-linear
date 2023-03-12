@@ -249,9 +249,14 @@ function getCardTableRow({
   card: Issue;
   relatedCard: Issue | undefined;
 }): string {
+  const titleWithPipeReplaced = card.title.replace(/\|/g, ",");
+  const onlyLettersAndNumbers = titleWithPipeReplaced.replace(
+    /[^a-zA-Z0-9 ]/g,
+    ""
+  );
   return `|[${card.identifier}](${card.url})${
     relatedCard ? `|[${relatedCard.identifier}](${relatedCard.url})` : ""
-  }|${card.title.replace(/\|/g, ",")}|`;
+  }|${onlyLettersAndNumbers}|`;
 }
 
 async function getRelatedCard({
